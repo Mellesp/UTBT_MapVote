@@ -5,13 +5,23 @@
 ## Installation
 Add to unrealtournament.ini: `ServerPackages=UTBT_MapVote_v10`
 Add as Mutator: `UTBT_MapVote_v10.MV_Mutator`
-#### Setting up the maplist, categories and announcement
+### Setting up the maplist, categories and announcement
 See [Requester] in UTBT_MapVote.ini. Place in there the paths to the corresponding files. Make sure to include headers in each file such as:
 - maplist file: `[maplist]`.
 - categories file: `[categories]`.
 - category files themself: `[category_name]` (example: `[BTCup 2021 - Division 1]`)
 - announcment file: `[announcement]`
 - update file: `[update]`
+
+### maplist file
+For the maplist file, a format of this is expected:
+```ini
+[maplist]
+CTF-BT-Map1*5
+CTF-BT-Map2*10
+CTF-BT-Map3*1
+```
+In this example Map1 is set with a difficulty rating of 5, Map2 with a 10 and Map3 with a rating of 1.
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
@@ -66,6 +76,6 @@ Announcement=
 - **MapListCheckUpdateIntervalSeconds:** This will set the time interval in seconds for the Requester to Re-Request "Update_URI", to keep track of updates.
 - **LastMapListUpdate:** This set/modified automatically by the MapVote. Using this value as a UpdateID/Date to compare with the found UpdateID/Date at "Update_URI".
 #### [Cache]
-Everything under this header will be used as the name says; as Cache. All the data gathered via the Requester will be stored here server side. Clients who enter the server will automatically download a copy of these contents, saving the Cache client side as well, making the MapVote super quick on opening. Client side Cache will always be validated with the server cache, and in case of difference the client cache will be overwritten with the server cache.
+- Everything under this header will be used as the name says; as Cache. All the data gathered via the Requester will be stored here server side. Clients who enter the server will automatically download a copy of these contents, saving the Cache client side as well, making the MapVote super quick on opening. Client side Cache will always be validated with the server cache, and in case of difference the client cache will be overwritten with the server cache.
 
 
