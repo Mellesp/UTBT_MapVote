@@ -6,12 +6,12 @@
 Add to unrealtournament.ini: `ServerPackages=UTBT_MapVote_v10`
 Add as Mutator: `UTBT_MapVote_v10.MV_Mutator`
 #### Setting up the maplist, categories and announcement
-See [Requester] in UTBT_MapVote.ini. Place in there the paths to the corresponding files. Make sure to include headers in each file.
-- For the maplist file: `[maplist]`.
-- For the categories file: `[categories]`.
-- For the category files themself: `[category_name]` (example: `[BTCup 2021 - Division 1]`)
-- For the announcment file: `[announcement]`
-- For the update file: `[update]`
+See [Requester] in UTBT_MapVote.ini. Place in there the paths to the corresponding files. Make sure to include headers in each file such as:
+- maplist file: `[maplist]`.
+- categories file: `[categories]`.
+- category files themself: `[category_name]` (example: `[BTCup 2021 - Division 1]`)
+- announcment file: `[announcement]`
+- update file: `[update]`
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
