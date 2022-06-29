@@ -1,12 +1,10 @@
 # UTBT_MapVote
 *A proper MapVote specifically designed for BunnyTrack*
-![SpectatorMenu](https://cdn.discordapp.com/attachments/710812298847060002/834525687141892126/unknown.png)
+![UTBT_MapVote]([https://cdn.discordapp.com/attachments/710812298847060002/834525687141892126/unknown.png](https://cdn.discordapp.com/attachments/975106092969377832/991759083696828506/unknown.png))
 
 ## Installation
-```
-ServerPackages=UTBT_MapVote_v10
-```
-Add the Mutator: `UTBT_MapVote_v10.MV_Mutator`
+Add to unrealtournament.ini: `ServerPackages=UTBT_MapVote_v10`
+Add as Mutator: `UTBT_MapVote_v10.MV_Mutator`
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
@@ -62,7 +60,8 @@ EmptyServerTimeMinutes: If "bSwitchLevelOnEmptyServer" is set to true, this sett
 bSwitchToRandomMap: When voting has ended without any votes, or when there is an absense of players for X minutes; switch to a random map? or switch to the "DefaultMap"?
 
 DefaultMap: The MapVote will switch to this map in the 2 scenario's described above at "bSwitchToRandomMap".
-``````[Requester]
+```
+```[Requester]
 HostAddress: Self explanatory; the hostname of where the Requester will look for MapVote data, such as map names, categories, announcement.
 Update_URI: The location of the UpdateID/Date. The MapVote will regularly check this to see if it should update.
 Announcement_URI: The location of the announcement text, in limited HTML.
@@ -70,7 +69,8 @@ MapList_URI: The location of map names.
 Categories_URI: The location of Categories.
 MapListCheckUpdateIntervalSeconds: This will set the time interval in seconds for the Requester to Re-Request "Update_URI", to keep track of updates.
 LastMapListUpdate: This set/modified automatically by the MapVote. Using this value as a UpdateID/Date to compare with the found UpdateID/Date at "Update_URI".
-``````[Cache]
+```
+```[Cache]
 Everything under this header will be used as the name says; as Cache. All the data gathered via the Requester will be stored here server side. Clients who enter the server will automatically download a copy of these contents, saving the Cache client side as well, making the MapVote super quick on opening. Client side Cache will always be validated with the server cache, and in case of difference the client cache will be overwritten with the server cache.
-
+```
 
