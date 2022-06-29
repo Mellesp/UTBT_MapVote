@@ -64,12 +64,15 @@ For the announcement file, a format of this is expected:
 ```
 Supported HTML elements are:
 -   `<html>`
--   `<body>`
+-   `<body bgcolor=#ffffff link=#ffffff alink=#ffffff>...</body>` (set color for background and links)
+-   `<font color=#ffffff bgcolor=#ffffff>...</font>` (set color for text and background)
 -   `<center>`
 -   `<br>`
 -   `<nobr>`
 -   `<p>`
 -   `<a href=\"...\">My link<a>`
+-   `<h1>` (this is the only header, no <h2> etc. are available)
+-   `<blink>` on/off blinking text
 
 
 ## UTBT_MapVote.ini
