@@ -1,6 +1,6 @@
 # UTBT_MapVote
 *A proper MapVote specifically designed for BunnyTrack*
-![UTBT_MapVote]([https://cdn.discordapp.com/attachments/710812298847060002/834525687141892126/unknown.png](https://cdn.discordapp.com/attachments/975106092969377832/991759083696828506/unknown.png))
+![UTBT_MapVote](https://cdn.discordapp.com/attachments/975106092969377832/991759083696828506/unknown.png)
 
 ## Installation
 Add to unrealtournament.ini: `ServerPackages=UTBT_MapVote_v10`
@@ -39,7 +39,7 @@ Announcement=
 ### Explainer:
 
 #### [Settings]
-- MapListCacheName: The name of the cache file stored on clients, holding the mapvote data until a new update appears. For example, a value of "SummerRush" will make a SummerRush.ini file on clients. It's recommended to use different cache file names for servers with different maplists, so that clients can hold multiple maplists at the same time without needing to update/overwrite.
+- **MapListCacheName:** The name of the cache file stored on clients, holding the mapvote data until a new update appears. For example, a value of "SummerRush" will make a SummerRush.ini file on clients. It's recommended to use different cache file names for servers with different maplists, so that clients can hold multiple maplists at the same time without needing to update/overwrite.
 
 - bAllowSpectatorVotes: Should be self explanatory. Option to give spectators the ability to place votes, just like players can.
 
@@ -51,7 +51,7 @@ Announcement=
 
 - ScoreBoardDelay: Once the map has ended, this is the amount of seconds until the MapVote will pop-up for players that did not vote yet. Starting the VoteTimeLimit once that happens.
 
-bSwitchToRandomMapAtFailedMapSwitch: Bad or missing files (dependencies) for maps can happen. Setting this to false will keep the map running on a failed map switch, and will give players the ability to revote another map. Setting this to true will let the MapVote pick another random map immediately, and switches to this.
+- bSwitchToRandomMapAtFailedMapSwitch: Bad or missing files (dependencies) for maps can happen. Setting this to false will keep the map running on a failed map switch, and will give players the ability to revote another map. Setting this to true will let the MapVote pick another random map immediately, and switches to this.
 
 - bSwitchLevelOnEmptyServer: When there are no players in the server, the mapvote can switch to another map based on the duration of absense of players, see "EmptyServerTimeMinutes" to configure this duration.
 
