@@ -4,6 +4,7 @@
 
 ## Installation
 Add to unrealtournament.ini: `ServerPackages=UTBT_MapVote_v10`
+
 Add as Mutator: `UTBT_MapVote_v10.MV_Mutator`
 ### Setting up the maplist/categories/announcement
 See [Requester] in UTBT_MapVote.ini. Place in there the paths to the corresponding files. Make sure to include headers in each file such as:
