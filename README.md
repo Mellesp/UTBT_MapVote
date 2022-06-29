@@ -22,6 +22,47 @@ CTF-BT-Map2*10
 CTF-BT-Map3*1
 ```
 In the example above; Map1 is set with a difficulty rating of 5, Map2 with a 10 and Map3 with a rating of 1.
+### Categories file
+For the categories file, a format of this is expected:
+```ini
+[categories]
+Easy Maps
+Medium Maps
+Hard Maps
+Most Played Maps
+New Maps
+BTCup 2021 - Division 1
+ClanBase Maps
+```
+### Categories files
+For each category a separate file is expected in this format:
+```ini
+[BTCup 2021 - Division 1]
+CTF-BT-KryptonCB
+CTF-BT-RookCB
+CTF-BT-BioshockCB
+CTF-BT-SolarMoonCB2
+CTF-BT-IndifferentV4
+CTF-BT-Adeon-Factory
+CTF-BT-TheLostJournalCB
+```
+### Announcement file
+For the announcement file, a format of this is expected:
+```html
+[announcement]
+<html>
+    <body>
+        <center>
+            <br>
+            <h1>Welcome to UTBT</h1>
+            <p><b>Lorem ipsum</b> dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>Visit our <a href=\"http://www.UTBT.net\">Discord</a></p>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        </center>
+    </body>
+</html>
+```
+
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
@@ -41,11 +82,11 @@ bSwitchToRandomMap=True
 DefaultMap=
 
 [Requester]
-HostAddress=soupy.utbt.net
-Update_URI=/update.ini
-Announcement_URI=/announcement.ini
-MapList_URI=/maplist.ini
-Categories_URI=/categories.ini
+HostAddress=
+Update_URI=
+Announcement_URI=
+MapList_URI=
+Categories_URI=
 MapListCheckUpdateIntervalSeconds=60
 LastMapListUpdate=
 
