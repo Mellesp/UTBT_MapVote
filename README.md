@@ -4,6 +4,7 @@
 
 ## Installation
 Add to unrealtournament.ini: `ServerPackages=UTBT_MapVote_v10`
+
 Add as Mutator: `UTBT_MapVote_v10.MV_Mutator`
 
 ## UTBT_MapVote.ini
