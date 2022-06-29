@@ -13,7 +13,7 @@ See [Requester] in UTBT_MapVote.ini. Place in there the paths to the correspondi
 - announcment file: `[announcement]`
 - update file: `[update]`
 
-### maplist file
+### Maplist file
 For the maplist file, a format of this is expected:
 ```ini
 [maplist]
@@ -21,12 +21,12 @@ CTF-BT-Map1*5
 CTF-BT-Map2*10
 CTF-BT-Map3*1
 ```
-In this example Map1 is set with a difficulty rating of 5, Map2 with a 10 and Map3 with a rating of 1.
+In the example above; Map1 is set with a difficulty rating of 5, Map2 with a 10 and Map3 with a rating of 1.
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
 It consists of 3 headers; Settings, Requester and Cache.
-```
+```ini
 [Settings]
 MapListCacheName=SummerRush
 bAllowSpectatorVotes=False
