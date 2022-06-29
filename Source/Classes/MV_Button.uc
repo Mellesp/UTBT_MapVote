@@ -33,7 +33,7 @@ function BeforePaint(Canvas C, float X, float Y)
 		TextY += 1;
 	}		
 }
-
+//-----------------------------------------------------------------------------
 function MouseEnter()
 {
 	Super.MouseEnter();
@@ -51,7 +51,7 @@ function MouseLeave()
 	ButtonColor.G = 48;
 	ButtonColor.B = 48;
 }
-
+//-----------------------------------------------------------------------------
 function Paint(Canvas C, float X, float Y)
 {
 	LookAndFeel.Button_DrawSmallButton(Self, C);
@@ -65,13 +65,13 @@ function Paint(Canvas C, float X, float Y)
 		C.DrawColor.B = 255;
 	}
 }
-
+//-----------------------------------------------------------------------------
 function RClick(float X, float Y) 
 {
 	Super.RClick(X, Y);
 	GetPlayerOwner().PlaySound(Sound'Botpack.Click', SLOT_Interface);
 }
-
+//-----------------------------------------------------------------------------
 defaultproperties
 {
 	TextColor=(R=255,G=255,B=255)

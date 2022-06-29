@@ -8,10 +8,11 @@ class MV_MainWindow expands UWindowDialogClientWindow;
 #exec TEXTURE IMPORT NAME=NoShot0			FILE=TEXTURES\NoShot0.BMP			FLAGS=2 	MIPS=OFF
 #exec TEXTURE IMPORT NAME=NoShot1			FILE=TEXTURES\NoShot1.BMP			FLAGS=2 	MIPS=OFF
 #exec TEXTURE IMPORT NAME=NoShot2			FILE=TEXTURES\NoShot2.BMP			FLAGS=2 	MIPS=OFF
+#exec OBJ LOAD FILE=TEXTURES\MapVote_Fonts.utx	PACKAGE=UTBT_MapVote_v10
 //-----------------------------------------------------------------------------
 var 	MV_MapListBox 			MapListBox;
 var 	MV_CategoryListBox 		CategoryListBox;
-var		MV_LogoMeshWindow		LogoMeshWindow;
+var		MV_LogoWindow			LogoWindow;
 var		MV_HTMLTextArea			Announcement;
 var 	MV_VoteListBox			VoteListBox;
 var 	MV_PlayerListBox		PlayerListBox;
@@ -266,7 +267,7 @@ function RootDesign()
 
 	//	UTBT: no start-up sound?
 	// GetPlayerOwner().PlaySound(sound'WindowOpen', SLOT_Interface);
-	LookAndFeel = Root.GetLookAndFeel("UTBT_MapVote_v09.MV_LookAndFeel");
+	LookAndFeel = Root.GetLookAndFeel(Left(Class, InStr(Class, "."))$".MV_LookAndFeel");
 	MV_LookAndFeel(LookAndFeel).Main = Self;
 	Root.HandCursor.Tex = Texture'UTBT_CursorLink';
 	Root.HandCursor.HotX = 9;
@@ -279,18 +280,23 @@ function RootDesign()
 	votelistH		= seg3H * VoteListPercentWinHeight;
 	playerlistH		= seg3H * PlayerListPercentWinHeight;
 
+	UTBTVersionStr = "UTBT MapVote v" $ GetVersionNumber();
 	SetupFonts();
+}
+
+function string GetVersionNumber()
+{
+	local string PackageName, str;
+
+	PackageName = Left(Class, InStr(Class, "."));
+	str = Right(PackageName, Len(PackageName) - Len("UTBT_MapVote_v"));
+	str = Left(str, Len(str) - 1) $ "." $ Right(str, 1);
+
+	return str;
 }
 
 function SetAnnouncement(string str)
 {
-	// str $= "<html><body>";
-	// str $= "<center><br><h1>Welcome to UTBT</h1>";
-	// str $= "<p><b>Lorem ipsum</b> dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>";
-	// str $= "<p>Visit our <a href=\"http://www.UTBT.net\">Discord</a></p>";
-	// str $= "<p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>";
-	// return str;
-
 	Announcement.SetHTML(str);
 }
 
@@ -302,12 +308,12 @@ function Created()
 
 	//-------------------------------------------------------------------------------------------
 	//	Segment 1
-		//	LogoMeshWindow
+		//	LogoWindow
 		X = divW;
 		Y = divH;
 		W = seg1W;
 		H = seg1W;
-		LogoMeshWindow = MV_LogoMeshWindow(CreateWindow(class'MV_LogoMeshWindow', X, Y, W, H));
+		LogoWindow = MV_LogoWindow(CreateWindow(class'MV_LogoWindow', X, Y, W, H));
 
 		//	CategoryTitle
 		X = divW;
@@ -615,7 +621,8 @@ function Notify(UWindowDialogControl C, byte E)
 				break;
 				
 				case VoteMapButton:
-					MapListBox.DoubleClickItem(MapListBox.SelectedItem);
+					if(SelectedMap != "" && AllowVote())
+						WRI.VoteMap(SelectedMap);
 				break;
 
 				case ChatSendButton:
@@ -641,6 +648,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case MapListBox:
 					if(MapListBox.SelectedItem != None)
 					{
+						GetPlayerOwner().PlaySound(Sound'LittleSelect', SLOT_Interface);
 						if(MV_ListItem(MapListBox.SelectedItem).MapName != "")
 							SelectMap(MV_ListItem(MapListBox.SelectedItem).MapName);
 						DeSelect(VoteListBox);
@@ -651,6 +659,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case VoteListBox:
 					if(VoteListBox.SelectedItem != None)
 					{
+						GetPlayerOwner().PlaySound(Sound'LittleSelect', SLOT_Interface);
 						if(MV_ListItem(VoteListBox.SelectedItem).MapName != "")
 							SelectMap(MV_ListItem(VoteListBox.SelectedItem).MapName);
 						DeSelect(MapListBox);
@@ -661,6 +670,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case PlayerListBox:
 					if(PlayerListBox.SelectedItem != None)
 					{
+						GetPlayerOwner().PlaySound(Sound'LittleSelect', SLOT_Interface);
 						if(MV_ListItem(PlayerListBox.SelectedItem).MapName != "")
 							SelectMap(MV_ListItem(PlayerListBox.SelectedItem).MapName);
 						DeSelect(MapListBox);
@@ -691,7 +701,11 @@ function Notify(UWindowDialogControl C, byte E)
 				break;
 
 				case SearchMapEditBox:
-					MapListBox.DoubleClickItem(MapListBox.SelectedItem);
+					if(MapListBox.SelectedItem != None)
+					{
+						GetPlayerOwner().PlaySound(Sound'Botpack.Click', SLOT_Interface);
+						MapListBox.DoubleClickItem(MapListBox.SelectedItem);
+					}
 				break;
 			}
 		break;
@@ -821,8 +835,13 @@ function KeyDown(int Key, float X, float Y)
 
 	// ENTER -> Vote Map
 	if(Key == PP.EInputKey.IK_Enter)
+	{
 		if(SelectedMap != "" && AllowVote())
+		{
+			GetPlayerOwner().PlaySound(Sound'Botpack.Click', SLOT_Interface);
 			WRI.VoteMap(SelectedMap);
+		}
+	}
 
 	// TAB -> ChatEditBox
 	if(Key == PP.EInputKey.IK_Tab)
@@ -850,94 +869,94 @@ function SetupFonts()
 {
 	if(Root.GUIScale == 3)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma35", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB35", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma40", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma40", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB40", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma37", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma30", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma35", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB35", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma40", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma40", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB40", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma37", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma30", class'Font'));
 	}
 	else if(Root.GUIScale == 2.75)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma32", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB32", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma40", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma40", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB40", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma35", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma27", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma32", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB32", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma40", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma40", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB40", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma35", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma27", class'Font'));
 	}
 	else if(Root.GUIScale == 2.5)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma30", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB30", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma40", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma37", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB37", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma32", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma25", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma30", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB30", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma40", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma37", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB37", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma32", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma25", class'Font'));
 	}
 	else if(Root.GUIScale == 2.25)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma27", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB27", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma37", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma35", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB35", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma30", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma22", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma27", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB27", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma37", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma35", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB35", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma30", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma22", class'Font'));
 	}
 	else if(Root.GUIScale == 2)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma25", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB25", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma35", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma32", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB32", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma27", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma20", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma25", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB25", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma35", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma32", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB32", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma27", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma20", class'Font'));
 	}
 	else if(Root.GUIScale == 1.75)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma22", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB22", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma32", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma30", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB30", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma25", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma17", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma22", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB22", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma32", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma30", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB30", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma25", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma17", class'Font'));
 	}
 	else if(Root.GUIScale == 1.5)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma20", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB20", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma30", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma27", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB27", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma22", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma15", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma20", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB20", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma30", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma27", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB27", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma22", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma15", class'Font'));
 	}
 	else if(Root.GUIScale == 1.25)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma17", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB17", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma27", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma25", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB25", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma20", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma12", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma17", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB17", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma27", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma25", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB25", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma20", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma12", class'Font'));
 	}
 	else if(Root.GUIScale == 1)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma15", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB15", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma22", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma20", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB20", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma17", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma10", class'Font'));
-	}	
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma15", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB15", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma22", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma20", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB20", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma17", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma10", class'Font'));
+	}
 	else if(Fonts[F_ListItem] == none
 	|| Fonts[F_ListItemBold] == none
 	|| Fonts[F_Title] == none
@@ -946,13 +965,13 @@ function SetupFonts()
 	|| Fonts[F_Button] == none
 	|| Fonts[F_Version] == none)
 	{
-		Fonts[F_ListItem]		= Font(DynamicLoadObject("UWindowFonts.Tahoma15", class'Font'));
-		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UWindowFonts.TahomaB15", class'Font'));
-		Fonts[F_Title]			= Font(DynamicLoadObject("UWindowFonts.Tahoma22", class'Font'));
-		Fonts[F_Header]			= Font(DynamicLoadObject("UWindowFonts.Tahoma20", class'Font'));
-		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UWindowFonts.TahomaB20", class'Font'));
-		Fonts[F_Button]			= Font(DynamicLoadObject("UWindowFonts.Tahoma17", class'Font'));
-		Fonts[F_Version]		= Font(DynamicLoadObject("UWindowFonts.Tahoma10", class'Font'));
+		Fonts[F_ListItem]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma15", class'Font'));
+		Fonts[F_ListItemBold]	= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB15", class'Font'));
+		Fonts[F_Title]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma22", class'Font'));
+		Fonts[F_Header]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma20", class'Font'));
+		Fonts[F_HeaderBold]		= Font(DynamicLoadObject("UTBT_MapVote_v10.TahomaB20", class'Font'));
+		Fonts[F_Button]			= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma17", class'Font'));
+		Fonts[F_Version]		= Font(DynamicLoadObject("UTBT_MapVote_v10.Tahoma10", class'Font'));
 	}
 }
 
@@ -994,21 +1013,21 @@ function Tick(float DeltaTime)
 defaultproperties
 {
 	borderW=3
-	seg1W=220
+	seg1W=228
 	seg2W=480
 	seg3W=500
-	divW=20
-	divH=16
+	divW=18
+	divH=18
 	divHC=12
 	titleH=32
 	buttonH=24
 	headerH=28
-	footH=50
+	footH=52
 	scrollW=12
-	AnnouncementPercentWinHeight=0.3
+	AnnouncementPercentWinHeight=0.40
 	MapInfoPercentWinHeight=0.15
-	VoteListPercentWinHeight=0.25
-	PlayerListPercentWinHeight=0.3
+	VoteListPercentWinHeight=0.20
+	PlayerListPercentWinHeight=0.25
 	FontColor=(R=255,G=255,B=255)
 	FontAltColor=(R=0,G=0,B=0)
 	SelectColor=(R=0,G=96,B=96)
@@ -1016,7 +1035,7 @@ defaultproperties
 	HoverColor=(R=4,G=4,B=4)
 	OwnerColor=(R=255,G=255,B=100,A=0)
 	VotedColor=(R=100,G=255,B=100,A=0)
-	OuterBorderColor=(R=0,G=192,B=255,A=0)
+	OuterBorderColor=(R=64,G=64,B=64,A=0)
 	ActiveBorderColor=(R=0,G=64,B=96,A=0)
 	InactiveBorderColor=(R=20,G=128,B=255,A=0)
 	YellowHeaderColor=(R=255,G=255,B=100,A=0)
@@ -1024,5 +1043,4 @@ defaultproperties
 	MapInfoColor=(R=100,G=255,B=100,A=0)
 	GrayColor=(R=64,G=64,B=64,A=0)
 	MapScreenShot=Texture'NoShot0'
-	UTBTVersionStr="UTBT MapVote v0.9"
 }

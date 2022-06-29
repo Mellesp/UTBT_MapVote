@@ -2,13 +2,12 @@
 // MV_Cache made by OwYeaW
 //=============================================================================
 class MV_Cache expands Object config(UTBT_MapVote) perobjectconfig;
-
-var config string Date;
+//-----------------------------------------------------------------------------
 var config string MD5;
 var config string Announcement;
 var config string Maps[4096];
 var config string Categories[128];
-
+//-----------------------------------------------------------------------------
 function bool DoesMapExist(string MapName)
 {
 	local int i, posM;
@@ -38,7 +37,7 @@ function bool DoesMapExist(string MapName)
 	}
 	return false;
 }
-
+//-----------------------------------------------------------------------------
 function string GetRandomMap()
 {
 	local int i, posM, mapCount, rng;
@@ -67,10 +66,9 @@ function string GetRandomMap()
 		}
 	}
 }
-
+//-----------------------------------------------------------------------------
 defaultproperties
 {
-	Date=""
 	MD5=""
 	Announcement=""
 	Maps(0)=""

@@ -30,7 +30,7 @@ function Paint(Canvas C, float MouseX, float MouseY)
 
 	Super.Paint(C, MouseX, MouseY);
 }
-
+//-----------------------------------------------------------------------------
 function MouseEnter()
 {
 	bHover = true;
@@ -40,7 +40,7 @@ function MouseLeave()
 {
 	bHover = false;
 }
-
+//-----------------------------------------------------------------------------
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
 	local float XL, YL;
@@ -74,13 +74,7 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	C.StrLen(I.VoteCount, XL, YL);
 	ClipText(C, WinWidth - 32 - (XL/2), Y, I.VoteCount);
 }
-
-function SetSelected(float X, float Y)
-{
-	GetPlayerOwner().PlaySound(Sound'LittleSelect', SLOT_Interface);
-	Super.SetSelected(X, Y);
-}
-
+//-----------------------------------------------------------------------------
 function KeyDown(int Key, float X, float Y)
 {
 	ParentWindow.KeyDown(Key, X, Y);
@@ -90,7 +84,7 @@ function DoubleClickItem(UWindowListBoxItem I)
 {
 	UWindowDialogClientWindow(ParentWindow).Notify(self, DE_DoubleClick);
 }
-
+//-----------------------------------------------------------------------------
 defaultproperties
 {
 	ItemHeight=20

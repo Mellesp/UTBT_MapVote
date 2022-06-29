@@ -43,7 +43,6 @@ function MouseLeave()
 //-----------------------------------------------------------------------------
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
-	// local float XL, YL;
 	local MV_ListItem I;
 
 	I = MV_ListItem(Item);
@@ -77,13 +76,8 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 		C.Font = Main.Fonts[Main.F_ListItem];
 	}
 
-	//	UTBT: for centered category names. Do we want this?
-	// C.StrLen(I.CatName, XL, YL);
-	// ClipText(C, (W-XL)/2, Y, I.CatName);
-
 	ClipText(C, X+4, Y, I.CatName);
 }
-
 //-----------------------------------------------------------------------------
 function KeyDown(int Key, float X, float Y)
 {
@@ -255,7 +249,6 @@ function ResetCats()
 	}
 	MV_MainWindow(ParentWindow).FilterMapListBox();
 }
-
 //-----------------------------------------------------------------------------
 defaultproperties
 {

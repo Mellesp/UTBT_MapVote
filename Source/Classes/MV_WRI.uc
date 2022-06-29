@@ -204,6 +204,7 @@ simulated function loadData()
 		Main.AddCategory(str, i, false);
 	}
 
+	// Add Announcement
 	Main.SetAnnouncement(Client.ClientCache.Announcement);
 
 	GetStatusUpdate();

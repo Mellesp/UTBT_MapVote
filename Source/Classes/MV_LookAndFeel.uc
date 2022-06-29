@@ -24,7 +24,7 @@ function SB_VDraw(UWindowVScrollbar W, Canvas C)
 		W.DrawStretchedTexture(C, 0, W.ThumbStart, Size_ScrollbarWidth, W.ThumbHeight, Texture'SB');
 	}
 }
-
+//-----------------------------------------------------------------------------
 function SB_SetupUpButton(UWindowSBUpButton W)
 {
 	local Texture T;
@@ -43,7 +43,7 @@ function SB_SetupUpButton(UWindowSBUpButton W)
 	W.OverRegion = SBUpUp;
 	W.DisabledRegion = SBUpDisabled;
 }
-
+//-----------------------------------------------------------------------------
 function SB_SetupDownButton(UWindowSBDownButton W)
 {
 	local Texture T;
@@ -62,7 +62,7 @@ function SB_SetupDownButton(UWindowSBDownButton W)
 	W.OverRegion = SBDownUp;
 	W.DisabledRegion = SBDownDisabled;
 }
-
+//-----------------------------------------------------------------------------
 function Button_DrawSmallButton(UWindowSmallButton B, Canvas C)
 {
 	local float Y, H, W;
@@ -81,17 +81,17 @@ function Button_DrawSmallButton(UWindowSmallButton B, Canvas C)
 	SB = 6;
 	W = B.WinWidth;
 	H = B.WinHeight;
-	B.DrawStretchedTextureSegment(C, 0      , 0   , SB    , SB    , 0,		Y,		34,		31, SmallButton);	//TL
-	B.DrawStretchedTextureSegment(C, 0      , SB  , SB    , H-SB*2, 0,		Y+31,	34,		2, SmallButton);	//CL
-	B.DrawStretchedTextureSegment(C, 0      , H-SB, SB    , SB    , 0,		Y+33,	34,		31, SmallButton);	//BL
-	B.DrawStretchedTextureSegment(C, SB     , 0   , W-SB*2, SB    , 34,		Y,		124,	31, SmallButton);	//T
-	B.DrawStretchedTextureSegment(C, SB     , SB  , W-SB*2, H-SB*2, 34,		Y+31,	124,	2, SmallButton);	//C
-	B.DrawStretchedTextureSegment(C, SB     , H-SB, W-SB*2, SB    , 34,		Y+33,	124,	31, SmallButton);	//B
-	B.DrawStretchedTextureSegment(C, W-SB   , 0   , SB    , SB    , 158,	Y,		34,		31, SmallButton);	//TR
-	B.DrawStretchedTextureSegment(C, W-SB   , SB  , SB    , H-SB*2, 158,	Y+31,	34,		2, SmallButton);	//CR
-	B.DrawStretchedTextureSegment(C, W-SB   , H-SB, SB    , SB    , 158,	Y+33,	34,		31, SmallButton);	//BR
+	B.DrawStretchedTextureSegment(C, 0      , 0   , SB    , SB    , 0,		Y,		34,		31,	Texture'NewButton'); //TL
+	B.DrawStretchedTextureSegment(C, 0      , SB  , SB    , H-SB*2, 0,		Y+31,	34,		2,	Texture'NewButton'); //CL
+	B.DrawStretchedTextureSegment(C, 0      , H-SB, SB    , SB    , 0,		Y+33,	34,		31,	Texture'NewButton'); //BL
+	B.DrawStretchedTextureSegment(C, SB     , 0   , W-SB*2, SB    , 34,		Y,		124,	31,	Texture'NewButton'); //T
+	B.DrawStretchedTextureSegment(C, SB     , SB  , W-SB*2, H-SB*2, 34,		Y+31,	124,	2,	Texture'NewButton'); //C
+	B.DrawStretchedTextureSegment(C, SB     , H-SB, W-SB*2, SB    , 34,		Y+33,	124,	31,	Texture'NewButton'); //B
+	B.DrawStretchedTextureSegment(C, W-SB   , 0   , SB    , SB    , 158,	Y,		34,		31,	Texture'NewButton'); //TR
+	B.DrawStretchedTextureSegment(C, W-SB   , SB  , SB    , H-SB*2, 158,	Y+31,	34,		2,	Texture'NewButton'); //CR
+	B.DrawStretchedTextureSegment(C, W-SB   , H-SB, SB    , SB    , 158,	Y+33,	34,		31,	Texture'NewButton'); //BR
 }
-
+//-----------------------------------------------------------------------------
 function MV_Editbox_SetupSizes(MV_EditControl W, Canvas C)
 {
 	local float TW, TH;
@@ -128,7 +128,7 @@ function MV_Editbox_SetupSizes(MV_EditControl W, Canvas C)
 	W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[B].W - MiscBevelR[B].W;
 	W.EditBox.WinHeight = W.WinHeight - MiscBevelT[B].H - MiscBevelB[B].H;
 }
-
+//-----------------------------------------------------------------------------
 defaultproperties
 {
 	Size_MinScrollbarHeight=32

@@ -2,10 +2,11 @@
 // MV_Mutator made by OwYeaW
 //=============================================================================
 class MV_Mutator expands Mutator;
-
-var MV_Requester	Requester;
-var MV_Settings		Settings;
-var MV_Cache		Cache;
+//-----------------------------------------------------------------------------
+var MV_Requester			Requester;
+var MV_Settings				Settings;
+var MV_RequesterSettings	RequesterSettings;
+var MV_Cache				Cache;
 
 var int CurrentID, CurrentPlayerCount, TimeLeft, ScoreBoardTime;
 var string msgPrefix, NextMap;
@@ -26,7 +27,7 @@ struct VoteStatus
 	var int		VoteCount;
 };
 var VoteStatus VS[32];
-
+//-----------------------------------------------------------------------------
 function PreBeginPlay()
 {
 	local Object Obj;
@@ -36,6 +37,9 @@ function PreBeginPlay()
 
 	Settings = new (Obj, 'Settings') class'MV_Settings';
 	Settings.SaveConfig();
+
+	RequesterSettings = new (Obj, 'Requester') class'MV_RequesterSettings';
+	RequesterSettings.SaveConfig();
 
 	Cache = new (Obj, 'Cache') class'MV_Cache';
 	Cache.SaveConfig();
@@ -51,12 +55,12 @@ function PreBeginPlay()
 		AT.Settings	= Settings;
 	}
 }
-
+//-----------------------------------------------------------------------------
 auto state Initializing
 {
 	ignores Mutate, MutatorTeamMessage, MutatorBroadcastMessage;
 }
-
+//-----------------------------------------------------------------------------
 state Ready
 {
 	function Tick(float DeltaTime)
@@ -97,13 +101,13 @@ state Ready
 	stop;
 
 	UpdateClients:
-		UpdateClientCaches();
 		ResetVoteStatus();
 		ClearAllOpenWRI();
-		BroadcastAdd("New MapList Update!", true);
+		UpdateClientCaches();
+		BroadcastAdd("New Maplist Update!", true);
 	stop;
 }
-
+//-----------------------------------------------------------------------------
 state SwitchingLevel
 {
 	ignores Mutate, MutatorTeamMessage, MutatorBroadcastMessage;
@@ -160,7 +164,7 @@ state SwitchingLevel
 		}
 	}
 }
-
+//-----------------------------------------------------------------------------
 function ClearAllOpenWRI()
 {
 	local MV_WRI WRI;
@@ -641,7 +645,7 @@ event BroadcastAdd(string msg, optional bool bPrefix)
 		if(P.IsA('PlayerPawn'))
 			P.ClientMessage(Msg, 'Event', true);
 }
-
+//-----------------------------------------------------------------------------
 defaultproperties
 {
 	bSwitchingLevel=false

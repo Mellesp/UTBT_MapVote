@@ -2,24 +2,23 @@
 // MV_Client made by OwYeaW
 //=============================================================================
 class MV_Client expands ReplicationInfo;
-
+//-----------------------------------------------------------------------------
 var MV_Mutator	Mut;
 var MV_Cache	Cache;
 var MV_Cache	ClientCache;
 var MV_WRI		WRI;
 
-var int MapCount, CatCount, LenCount;
-var string Date, MD5, Announcement;
+var int MapCount, CatCount, AnnCount;
+var string MD5;
 var string	RA_1[256], RA_2[256], RA_3[256], RA_4[256], RA_5[256], RA_6[256], RA_7[256], RA_8[256],
-RA_9[256], RA_10[256], RA_11[256], RA_12[256], RA_13[256], RA_14[256], RA_15[256], RA_16[256], CA[128];
+RA_9[256], RA_10[256], RA_11[256], RA_12[256], RA_13[256], RA_14[256], RA_15[256], RA_16[256], CA[128], AA[128];
 
 var float LoadingTime;
 var int OriginalClientNetspeed;
 
 var bool bAddRatingCategories;
-var name MapListCacheName;
-
 var bool bReady;
+var name CacheNameHolder;
 
 replication
 {
@@ -27,30 +26,37 @@ replication
 		compareCacheWithServer, finishedLoadingMapList;
 
 	reliable if(Role == ROLE_Authority)
-		getClientCache, clientStartTimer, MapCount, CatCount, Date, MD5, Announcement,
-		bAddRatingCategories, MapListCacheName, bReady, LenCount,
+		getClientCache, clientStartCounter, MD5, bAddRatingCategories, bReady,
 		RA_1, RA_2, RA_3, RA_4, RA_5, RA_6, RA_7, RA_8, RA_9,
-		RA_10, RA_11, RA_12, RA_13, RA_14, RA_15, RA_16, CA;
+		RA_10, RA_11, RA_12, RA_13, RA_14, RA_15, RA_16, CA, AA;
 }
-
+//-----------------------------------------------------------------------------
 function Init(MV_Mutator M)
 {
 	Mut						= M;
 	Cache					= M.Cache;
 	bAddRatingCategories	= M.Settings.bAddRatingCategories;
-	MapListCacheName		= M.Settings.MapListCacheName;
 
-	getClientCache();
+	getClientCache(M.Settings.MapListCacheName);
 }
 
-simulated function getClientCache()
+simulated function getClientCache(string MapListCacheName)
 {
 	local int i;
 	local string s, ClientMD5;
+	local ENetRole tmpRole;
 	local Object Obj;
 
-	Obj = new (none, MapListCacheName) class'Object';
-	ClientCache = new (Obj, 'UTBT_MapVote_Cache') class'MV_Cache';
+	//----------
+	// Hacky way to create a name client side - Thanks Buggie
+	tmpRole = Role;
+	Role = ROLE_Authority;
+	SetPropertyText("CacheNameHolder", MapListCacheName);
+	Role = tmpRole;
+	//----------
+
+	Obj = new (none, CacheNameHolder) class'Object';
+	ClientCache = new (Obj, 'UTBT_MapVote') class'MV_Cache';
 	ClientCache.SaveConfig();
 
 	for(i = 0; i < arraycount(ClientCache.Maps); i++)
@@ -65,19 +71,22 @@ simulated function getClientCache()
 	{
 		if(ClientCache.Categories[i] == "")
 			break;
-		
+
 		s = s $ ClientCache.Categories[i];
 	}
 
+	s = s $ ClientCache.Announcement;
 	ClientMD5 = Class'uHash'.static.MD5(s);
-	compareCacheWithServer(ClientMD5, ClientCache.MD5, ClientCache.Date);
+
+	compareCacheWithServer(ClientMD5, ClientCache.MD5);
 }
 
-function compareCacheWithServer(string ClientMD5, string ClientCacheMD5, string ClientCacheDate)
+function compareCacheWithServer(string ClientMD5, string ClientCacheMD5)
 {
-	if(Cache.MD5 != ClientMD5 || Cache.MD5 != ClientCacheMD5 || Cache.Date != ClientCacheDate)
+	if(Cache.MD5 != ClientMD5 || Cache.MD5 != ClientCacheMD5)
 	{
-		Log("[UTBT]-[MapVote]-[Client needs MapList update]");
+		Log("[UTBT]-[MapVote]-[Client needs Maplist update]");
+		PlayerPawn(Owner).ClientMessage("[UTBT MapVote] Downloading new Maplist...");
 		startMapListReplication();
 	}
 	else
@@ -93,24 +102,16 @@ function startMapListReplication()
 	OriginalClientNetspeed = PlayerPawn(Owner).player.CurrentNetSpeed;
 	PlayerPawn(Owner).player.CurrentNetSpeed = Min(int(ConsoleCommand("get IpDrv.TcpNetDriver MaxClientRate")), 25000);
 	sendNewMapListToClient();
-	clientStartTimer();
-}
-
-simulated function clientStartTimer()
-{
-	LoadingTime = Level.TimeSeconds;
-	SetTimer(1, false);
 }
 
 function sendNewMapListToClient()
 {
-	local int i;
+	local int i, x;
+	local string ann;
 
-	Date			= Cache.Date;
-	MD5				= Cache.MD5;
-	Announcement	= Cache.Announcement;
-	LenCount = len(Date) + len(MD5) + len(Announcement);
+	MD5 = Cache.MD5;
 
+	// Maps
 	for(i = 0; i < ArrayCount(Cache.maps); i++)
 	{
 		if(Cache.Maps[i] == "")
@@ -137,6 +138,7 @@ function sendNewMapListToClient()
 		else				RA_16[i - 3840]		= Cache.maps[i];
 	}
 
+	// Cats
 	for(i = 0; i < ArrayCount(Cache.Categories); i++)
 	{
 		if(Cache.Categories[i] == "")
@@ -147,11 +149,36 @@ function sendNewMapListToClient()
 
 		CA[i] = Cache.Categories[i];
 	}
+
+	// Announcement
+	ann = Cache.Announcement;
+	while(len(ann) > 256)
+	{
+		AA[x++] = Left(ann, 256);
+		ann = Right(ann, len(ann) - 256);
+	}
+	AA[x++] = ann;
+
+	AnnCount = x;
+
+	// start checking received data on client
+	clientStartCounter(MapCount, CatCount, AnnCount);
+}
+
+simulated function clientStartCounter(int MC, int CC, int AC)
+{
+	MapCount = MC;
+	CatCount = CC;
+	AnnCount = AC;
+
+	LoadingTime = Level.TimeSeconds;
+	SetTimer(0.5, false);
 }
 
 simulated function Timer()
 {
-	local int i, loadedMaps, loadedCats, loadedLens;
+	local int i, loadedMaps, loadedCats, loadedAnns;
+	local string TimeStr;
 
 	for(i = 0; i < 256 && RA_1[i] != "" ; i++) loadedMaps++;
 	for(i = 0; i < 256 && RA_2[i] != "" ; i++) loadedMaps++;
@@ -170,18 +197,21 @@ simulated function Timer()
 	for(i = 0; i < 256 && RA_15[i] != ""; i++) loadedMaps++;
 	for(i = 0; i < 256 && RA_16[i] != ""; i++) loadedMaps++;
 	for(i = 0; i < ArrayCount(CA) && CA[i] != ""; i++) loadedCats++;
+	for(i = 0; i < ArrayCount(AA) && AA[i] != ""; i++) loadedAnns++;
 
-	loadedLens = len(Date) + len(MD5) + len(Announcement);
-
-	if(loadedMaps != MapCount || loadedCats != CatCount || loadedLens != LenCount)
+	if(loadedMaps != MapCount || loadedCats != CatCount || loadedAnns != AnnCount)
 	{
-		Log("[UTBT]-[MapVote]-[Loading Maplist Data] ["$loadedMaps$"/"$MapCount$" maps] ["$loadedCats$"/"$CatCount$" categories] ["$int(Level.TimeSeconds - LoadingTime)$" seconds]");
-		SetTimer(1, false);
+		TimeStr = string((Level.TimeSeconds - LoadingTime));
+		TimeStr = Left(TimeStr, InStr(TimeStr, ".") + 2);
+		Log("[UTBT]-[MapVote]-[Loading Maplist Data] ["$loadedMaps$"/"$MapCount$" maps] ["$loadedCats$"/"$CatCount$" categories] ["$TimeStr$" seconds]");
+		SetTimer(0.1, false);
 		return;
 	}
 	else
 	{
-		Log("[UTBT]-[MapVote]-[Finished loading Data in "$int(Level.TimeSeconds - LoadingTime)$" seconds] ["$loadedMaps$"/"$MapCount$" maps] ["$loadedCats$"/"$CatCount$" categories]");
+		TimeStr = string((Level.TimeSeconds - LoadingTime));
+		TimeStr = Left(TimeStr, InStr(TimeStr, ".") + 2);
+		Log("[UTBT]-[MapVote]-[Finished loading Data] ["$loadedMaps$"/"$MapCount$" maps] ["$loadedCats$"/"$CatCount$" categories] ["$TimeStr$" seconds]");
 		writeClientCache();
 		finishedLoadingMapList();
 	}
@@ -193,6 +223,7 @@ function finishedLoadingMapList()
 
 	// reset client netspeed to its original value
 	PlayerPawn(Owner).player.CurrentNetSpeed = OriginalClientNetspeed;
+	PlayerPawn(Owner).ClientMessage("[UTBT MapVote] Download finished!");
 	bReady = true;
 	refreshWRI();
 
@@ -215,6 +246,12 @@ function finishedLoadingMapList()
 		RA_14[i] = "";
 		RA_15[i] = "";
 		RA_16[i] = "";
+
+		if(i < 128)
+		{
+			CA[i] = "";
+			AA[i] = "";
+		}
 	}
 }
 
@@ -227,6 +264,7 @@ function refreshWRI()
 simulated function writeClientCache()
 {
 	local int i;
+	local string announcement;
 
 	// first clean up the arrays
 	for(i = 0; i < arraycount(ClientCache.Maps); i++)
@@ -236,6 +274,7 @@ simulated function writeClientCache()
 		ClientCache.Categories[i] = "";
 
 	// now fill up the arrays with data
+	// Maps
 	for(i = 0; i < arraycount(ClientCache.Maps); i++)
 	{
 		if(i < 256)			ClientCache.maps[i] = RA_1[i];
@@ -256,6 +295,7 @@ simulated function writeClientCache()
 		else				ClientCache.maps[i] = RA_16[i - 3840];
 	}
 
+	// Cats
 	for(i = 0; i < ArrayCount(CA); i++)
 	{
 		if(CA[i] == "")
@@ -263,10 +303,18 @@ simulated function writeClientCache()
 
 		ClientCache.Categories[i] = CA[i];
 	}
-	
-	ClientCache.MD5				= MD5;
-	ClientCache.Date			= Date;
-	ClientCache.Announcement	= Announcement;
+
+	// Announcement
+	for(i = 0; i < ArrayCount(AA); i++)
+	{
+		if(CA[i] == "")
+			break;
+
+		announcement = announcement $ AA[i];
+	}
+
+	ClientCache.MD5 = MD5;
+	ClientCache.Announcement = announcement;
 	ClientCache.SaveConfig();
 }
 
@@ -278,7 +326,7 @@ function Tick(float DeltaTime)
 
 function Update()
 {
-	if(Cache.MD5 != MD5 || Cache.Date != Date)
+	if(Cache.MD5 != MD5)
 	{
 		startMapListReplication();
 		bReady = false;
@@ -293,4 +341,5 @@ defaultproperties
 {
 	RemoteRole=ROLE_SimulatedProxy
 	NetUpdateFrequency=60
+	bReady=false
 }

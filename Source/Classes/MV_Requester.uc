@@ -2,43 +2,29 @@
 // MV_Requester made by OwYeaW
 //=============================================================================
 class MV_Requester extends UBrowserHTTPClient;
+//-----------------------------------------------------------------------------
+var MV_Mutator				Mut;
+var MV_RequesterSettings	RS;
+var MV_Cache				Cache;
 
-var MV_Mutator	Mut;
-var MV_Settings	Settings;
-var MV_Cache	Cache;
-
-var string	HostAddress;
-var int		CheckUpdateInterval;
-var string	Update_URI;
-var string	Announcement_URI;
-var string	MapList_URI;
-var string	Categories_URI;
-
-var string Date;
+var string LastUpdateDate;
 var string cats[128];
 var string maps[4096];
 var string announcement;
 
-var int catPos;
-var int catCount;
-var int mapCount;
-
+var int CheckUpdateInterval;
+var int catPos, catCount, mapCount;
+//-----------------------------------------------------------------------------
 auto state Initializing
 {
 	function BeginState()
 	{
 		Mut					= MV_Mutator(Owner);
-		Settings			= Mut.Settings;
+		RS					= Mut.RequesterSettings;
 		Cache				= Mut.Cache;
-		HostAddress 		= Settings.HostAddress;
-		CheckUpdateInterval	= Clamp(Settings.MapListCheckUpdateIntervalSeconds, 10, 3600);
 
-		Update_URI 			= Settings.Update_URI;
-		Announcement_URI	= Settings.Announcement_URI;
-		MapList_URI			= Settings.MapList_URI;
-		Categories_URI		= Settings.Categories_URI;
-
-		Request(Update_URI);
+		CheckUpdateInterval	= Clamp(RS.MapListCheckUpdateIntervalSeconds, 10, 3600);
+		Request(RS.Update_URI);
 	}
 
 	function HTTPReceivedData(string Data)
@@ -50,7 +36,7 @@ auto state Initializing
 		}
 		else
 		{
-			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[update]\"] ["$HostAddress$Update_URI$"]");
+			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[update]\"] ["$RS.HostAddress$RS.Update_URI$"]");
 			GoToState('Finished', 'Failed');
 		}
 	}
@@ -60,30 +46,30 @@ auto state Initializing
 		local string updateDate;
 
 		updateDate = Left(Data, InStr(Data, LF));
-		if(Cache.Date == updateDate)
+		if(RS.LastMapListUpdate == updateDate)
 		{
 			GoToState('Finished', 'NoChanges');
 		}
 		else
 		{
 			Log("[UTBT]-[MapVote]-[New update found] [Starting Update of MapList]");
-			Date = updateDate;
+			LastUpdateDate = updateDate;
 			GotoState('GetMapList');
 		}
 	}
 
 	function HTTPError(int Code)
 	{
-		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: Initializing] ["$HostAddress$Update_URI$"]");
+		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: Initializing] ["$RS.HostAddress$RS.Update_URI$"]");
 		GoToState('Finished', 'Failed');
 	}
 }
-
+//-----------------------------------------------------------------------------
 state GetMapList
 {
 	function BeginState()
 	{
-		Request(MapList_URI);
+		Request(RS.MapList_URI);
 	}
 
 	function HTTPReceivedData(string Data)
@@ -96,7 +82,7 @@ state GetMapList
 		}
 		else
 		{
-			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[maplist]\"] ["$HostAddress$MapList_URI$"]");
+			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[maplist]\"] ["$RS.HostAddress$RS.MapList_URI$"]");
 			GoToState('Finished', 'Failed');
 		}
 	}
@@ -118,16 +104,16 @@ state GetMapList
 
 	function HTTPError(int Code)
 	{
-		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetMapList] ["$HostAddress$MapList_URI$"]");
+		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetMapList] ["$RS.HostAddress$RS.MapList_URI$"]");
 		GoToState('Finished', 'Failed');
 	}
 }
-
+//-----------------------------------------------------------------------------
 state GetCategories
 {
 	function BeginState()
 	{
-		Request(Categories_URI);
+		Request(RS.Categories_URI);
 	}
 
 	function HTTPReceivedData(string Data)
@@ -140,7 +126,7 @@ state GetCategories
 		}
 		else
 		{
-			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[categories]\"] ["$HostAddress$Categories_URI$"]");
+			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[categories]\"] ["$RS.HostAddress$RS.Categories_URI$"]");
 			GoToState('Finished', 'Failed');
 		}
 	}
@@ -162,11 +148,11 @@ state GetCategories
 
 	function HTTPError(int Code)
 	{
-		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetCategories] ["$HostAddress$Categories_URI$"]");
+		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetCategories] ["$RS.HostAddress$RS.Categories_URI$"]");
 		GoToState('Finished', 'Failed');
 	}
 }
-
+//-----------------------------------------------------------------------------
 state GetCategoriesContents
 {
 	function BeginState()
@@ -197,7 +183,7 @@ state GetCategoriesContents
 		}
 		else
 		{
-			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \""$catName$"\"] ["$HostAddress$Categories_URI$"]");
+			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \""$catName$"\"] ["$RS.HostAddress$RS.Categories_URI$"]");
 			GoToState('Finished', 'Failed');
 		}
 	}
@@ -234,16 +220,16 @@ state GetCategoriesContents
 
 	function HTTPError(int Code)
 	{
-		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetCategoriesContents] ["$HostAddress$"/"$cats[catPos]$".ini]");
+		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetCategoriesContents] ["$RS.HostAddress$"/"$cats[catPos]$".ini]");
 		GoToState('Finished', 'Failed');
 	}
 }
-
+//-----------------------------------------------------------------------------
 state GetAnnouncement
 {
 	function BeginState()
 	{
-		Request(Announcement_URI);
+		Request(RS.Announcement_URI);
 	}
 
 	function HTTPReceivedData(string Data)
@@ -256,23 +242,35 @@ state GetAnnouncement
 		}
 		else
 		{
-			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[announcement]\"] ["$HostAddress$Announcement_URI$"]");
+			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[announcement]\"] ["$RS.HostAddress$RS.Announcement_URI$"]");
 			GoToState('Finished', 'Failed');
 		}
 	}
 
 	function LoadAnnouncement(string Data)
 	{
+		local int p, x;
+
+		p = InStr(Data, LF);
+		while(p >= 0)
+		{
+			x = 1;
+			while(Mid(Data, p+x, 1) == " ")
+				x++;
+
+			Data = Left(Data, p) $ Right(Data, len(Data)-p-x);
+			p = InStr(Data, LF);
+		}
 		announcement = Data;
 	}
 
 	function HTTPError(int Code)
 	{
-		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetAnnouncement] ["$HostAddress$Announcement_URI$"]");
+		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: GetAnnouncement] ["$RS.HostAddress$RS.Announcement_URI$"]");
 		GoToState('Finished', 'Failed');
 	}
 }
-
+//-----------------------------------------------------------------------------
 state CompleteData
 {
 	function BeginState()
@@ -286,7 +284,7 @@ state CompleteData
 			if(Cache.maps[i] == "")
 				break;
 
-			str1 = str1 $ Cache.maps[i];
+			str1 $= Cache.maps[i];
 		}
 
 		for(i = 0; i < arraycount(Cache.Categories); i++)
@@ -294,8 +292,10 @@ state CompleteData
 			if(Cache.Categories[i] == "")
 				break;
 			
-			str1 = str1 $ Cache.Categories[i];
+			str1 $= Cache.Categories[i];
 		}
+
+		str1 $= Cache.Announcement;
 
 		cache_hash = Class'uHash'.static.MD5(str1);
 		//	-----------------------------------------
@@ -306,7 +306,7 @@ state CompleteData
 			if(maps[i] == "")
 				break;
 
-			str2 = str2 $ maps[i];
+			str2 $= maps[i];
 		}
 
 		for(i = 0; i < arraycount(cats); i++)
@@ -314,14 +314,16 @@ state CompleteData
 			if(cats[i] == "")
 				break;
 			
-			str2 = str2 $ cats[i];
+			str2 $= cats[i];
 		}
+
+		str2 $= announcement;
 
 		new_hash = Class'uHash'.static.MD5(str2);
 		//	-----------------------------------------
 
 		//	comparing 2 MD5 hashes + comparing dates - making sure every bit of data is updated
-		if(new_hash != cache_hash || new_hash != Cache.MD5 || Cache.Date != Date)
+		if(new_hash != cache_hash || new_hash != Cache.MD5 || RS.LastMapListUpdate != LastUpdateDate)
 			writeCache(new_hash);
 
 		Log("[UTBT]-[MapVote]-[Finished Downloading] [" $ mapCount $ " Maps] [" $ catCount $ " Categories]");
@@ -348,13 +350,14 @@ state CompleteData
 				Cache.Categories[i] = cats[i];
 		}
 
-		Cache.MD5			= new_hash;
-		Cache.Date			= Date;
-		Cache.Announcement	= announcement;
+		Cache.MD5				= new_hash;
+		RS.LastMapListUpdate	= LastUpdateDate;
+		Cache.Announcement		= announcement;
 		Cache.SaveConfig();
+		RS.SaveConfig();
 	}
 }
-
+//-----------------------------------------------------------------------------
 state Finished
 {
 	function BeginState()
@@ -377,7 +380,7 @@ state Finished
 		}
 		else
 		{
-			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[update]\"] ["$HostAddress$Update_URI$"]");
+			Log("[UTBT]-[MapVote] [ERROR: Received Incorrect Data] [Expected Header: \"[update]\"] ["$RS.HostAddress$RS.Update_URI$"]");
 			GoToState('Finished', 'Failed');
 		}
 	}
@@ -387,17 +390,17 @@ state Finished
 		local string updateDate;
 
 		updateDate = Left(Data, InStr(Data, LF));
-		if(Cache.Date != updateDate)
+		if(RS.LastMapListUpdate != updateDate)
 		{
 			Log("[UTBT]-[MapVote]-[New update found] [Starting Update of MapList]");
-			Date = updateDate;
+			LastUpdateDate = updateDate;
 			GotoState('GetMapList');
 		}
 	}
 
 	function HTTPError(int Code)
 	{
-		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: CheckingUpdates] ["$HostAddress$Update_URI$"]");
+		Log("[UTBT]-[MapVote] [ERROR: Response code "$Code$"] [During: CheckingUpdates] ["$RS.HostAddress$RS.Update_URI$"]");
 		Log("[UTBT]-[MapVote]-[Update Failed] [Trying again in "$CheckUpdateInterval$" seconds]");
 	}
 
@@ -416,7 +419,7 @@ state Finished
 		Mut.GoToState('Ready', 'Initialized');
 		stop;
 }
-
+//-----------------------------------------------------------------------------
 function string URL_Encode(string str)
 {
 	local int i;
@@ -451,13 +454,13 @@ function string URL_Encode(string str)
 
 	return r;
 }
-
+//-----------------------------------------------------------------------------
 function Request(string InURI)
 {
-	Log("[UTBT]-[MapVote]-[Request]> [" $ HostAddress $ InURI $ "]");
-	Browse(HostAddress, InURI);
+	Log("[UTBT]-[MapVote]-[Request]> [" $ RS.HostAddress $ InURI $ "]");
+	Browse(RS.HostAddress, InURI);
 }
-
+//-----------------------------------------------------------------------------
 function SetError(int Code)
 {
 	Disable('Tick');

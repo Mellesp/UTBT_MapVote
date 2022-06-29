@@ -190,12 +190,6 @@ function Select(int num)
 				SetSelectedItem(MapItem);
 }
 
-function SetSelected(float X, float Y)
-{
-	GetPlayerOwner().PlaySound(Sound'LittleSelect', SLOT_Interface);
-	Super.SetSelected(X, Y);
-}
-
 function int MapCount()
 {
 	return Items.CountShown();

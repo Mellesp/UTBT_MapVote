@@ -2,7 +2,7 @@
 // MV_ListItem made by OwYeaW
 //=============================================================================
 class MV_ListItem expands UWindowListBoxItem;
-
+//-----------------------------------------------------------------------------
 //	General
 var		bool			bHover;
 var		bool			bhide;
@@ -22,7 +22,7 @@ var 	int				VoteCount;
 //	PlayerListBox
 var 	string			PlayerName;
 var		bool			bVoted;
-
+//-----------------------------------------------------------------------------
 function MouseEnter()
 {
 	bHover = true;
