@@ -79,7 +79,7 @@ For the announcement file, a format of this is expected:
 [update]
 1656259997
 ```
-Make sure to update this each when you want the MapVote to update. The MapVote will request all data again, and will overwrite its cache in case a change in data is found.
+Update this file each time you make changes to the maplist/categories/announement files, so that the MapVote will request all data again, and will overwrite its cache in case a change in data is found.
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
