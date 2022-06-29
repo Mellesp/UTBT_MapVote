@@ -37,7 +37,8 @@ MD5=
 Announcement=
 ```
 ### Explainer:
-```[Settings]
+```
+[Settings]
 MapListCacheName: The name of the cache file stored on clients, holding the mapvote data until a new update appears.
 For example, a value of "SummerRush" will make a SummerRush.ini file on clients. It's recommended to use different cache file names for servers with different maplists, so that clients can hold multiple maplists at the same time without needing to update/overwrite.
 
@@ -61,7 +62,8 @@ bSwitchToRandomMap: When voting has ended without any votes, or when there is an
 
 DefaultMap: The MapVote will switch to this map in the 2 scenario's described above at "bSwitchToRandomMap".
 ```
-```[Requester]
+```
+[Requester]
 HostAddress: Self explanatory; the hostname of where the Requester will look for MapVote data, such as map names, categories, announcement.
 Update_URI: The location of the UpdateID/Date. The MapVote will regularly check this to see if it should update.
 Announcement_URI: The location of the announcement text, in limited HTML.
@@ -70,7 +72,8 @@ Categories_URI: The location of Categories.
 MapListCheckUpdateIntervalSeconds: This will set the time interval in seconds for the Requester to Re-Request "Update_URI", to keep track of updates.
 LastMapListUpdate: This set/modified automatically by the MapVote. Using this value as a UpdateID/Date to compare with the found UpdateID/Date at "Update_URI".
 ```
-```[Cache]
+```
+[Cache]
 Everything under this header will be used as the name says; as Cache. All the data gathered via the Requester will be stored here server side. Clients who enter the server will automatically download a copy of these contents, saving the Cache client side as well, making the MapVote super quick on opening. Client side Cache will always be validated with the server cache, and in case of difference the client cache will be overwritten with the server cache.
 ```
 
