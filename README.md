@@ -71,9 +71,15 @@ Supported HTML elements are:
 -   `<nobr>`
 -   `<p>`
 -   `<a href=\"...\">My link<a>`
--   `<h1>` (this is the only header, no <h2> etc. are available)
+-   `<h1>` (this is the only header, h2 etc. are not available)
 -   `<blink>` on/off blinking text
-
+### Update file
+For the announcement file, a format of this is expected:
+```ini
+[update]
+1656259997
+```
+Make sure to update this each when you want the MapVote to update. The MapVote will request all data again, and will overwrite its cache in case a change in data is found.
 
 ## UTBT_MapVote.ini
 The server ini is independent of the UTBT_MapVote version you are using. No need to modify headers when updating to a new version.
