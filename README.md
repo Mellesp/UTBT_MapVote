@@ -61,7 +61,8 @@ For the announcement file, a format of this is expected:
         </center>
     </body>
 </html>
-``` Supported HTML elements are:
+```
+Supported HTML elements are:
 -   `<html>`
 -   `<body>`
 -   `<center>`
