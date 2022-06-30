@@ -74,7 +74,7 @@ Supported HTML elements are:
 -   `<h1>` (this is the only header, h2 etc. are not available)
 -   `<blink>` on/off blinking text
 ### Update file
-For the announcement file, a format of this is expected:
+For the update file, a format of this is expected:
 ```ini
 [update]
 1656259997
